@@ -528,7 +528,7 @@ export async function requestTradeResultList (body: TradeRequest, leagueId: stri
 
     await RateLimiter.waitMulti(RATE_LIMIT_RULES.SEARCH)
 
-    const response = await Host.proxy(`${getTradeEndpoint()}/api/trade/search/${leagueId}`, {
+    const response = await Host.proxy(`${getTradeEndpoint()}/api/trade2/search/Standard`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -561,7 +561,7 @@ export async function requestResults (
   if (!data) {
     await RateLimiter.waitMulti(RATE_LIMIT_RULES.FETCH)
 
-    const response = await Host.proxy(`${getTradeEndpoint()}/api/trade/fetch/${resultIds.join(',')}?query=${queryId}`)
+    const response = await Host.proxy(`${getTradeEndpoint()}/api/trade2/fetch/${resultIds.join(',')}?query=${queryId}`)
     adjustRateLimits(RATE_LIMIT_RULES.FETCH, response.headers)
 
     const _data = await response.json() as TradeResponse<{ result: Array<FetchResult | null> }>

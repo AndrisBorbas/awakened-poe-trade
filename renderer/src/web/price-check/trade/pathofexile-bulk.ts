@@ -66,7 +66,7 @@ async function requestTradeResultList (body: TradeRequest, leagueId: string): Pr
 
     await RateLimiter.waitMulti(RATE_LIMIT_RULES.EXCHANGE)
 
-    const response = await Host.proxy(`${getTradeEndpoint()}/api/trade/exchange/${leagueId}`, {
+    const response = await Host.proxy(`${getTradeEndpoint()}/api/trade2/exchange/Standard`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -120,7 +120,7 @@ export function createTradeRequest (filters: ItemFilters, item: ParsedItem, have
   return {
     engine: 'new',
     query: {
-      have: have,
+      have,
       want: [tradeTag(item)!],
       status: {
         option: filters.trade.offline
@@ -182,7 +182,7 @@ export async function execBulkSearch (
       total: (chaosIsLoaded)
         ? resultsTag.length
         : (query.total - (results.length - resultsTag.length)),
-      listed: listed
+      listed
     }
   })
 
