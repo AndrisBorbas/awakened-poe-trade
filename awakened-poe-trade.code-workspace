@@ -23,6 +23,11 @@
 			"renderer/": true,
 			"docs/": true,
 			"dist/": true
-		}
+		},
+		"editor.codeActionsOnSave": {
+			"source.fixAll": "explicit"
+		},
+		"editor.formatOnSave": true,
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	}
 }
