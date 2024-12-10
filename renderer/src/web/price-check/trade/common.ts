@@ -28,6 +28,7 @@ export function apiToSatisfySearch(
 	stats: StatFilter[],
 	filters: ItemFilters,
 ): "trade" | "bulk" {
+	console.log(item, stats, filters);
 	if (stats.some((s) => !s.disabled)) {
 		return "trade";
 	}

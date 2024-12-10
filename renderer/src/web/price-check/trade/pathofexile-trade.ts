@@ -61,6 +61,7 @@ export const CATEGORY_TO_TRADE_ID = new Map([
 	[ItemCategory.SanctumRelic, "sanctum.relic"],
 	[ItemCategory.Tincture, "tincture"],
 	[ItemCategory.Charm, "azmeri.charm"],
+	[ItemCategory.Crossbow, "weapon.crossbow"],
 ]);
 
 const TOTAL_MODS_TEXT = {
@@ -122,20 +123,12 @@ interface TradeRequest {
 					category?: {
 						option?: string;
 					};
-				};
-			};
-			socket_filters?: {
-				filters: {
-					links?: FilterRange;
-					sockets?: {
-						w?: number;
-					};
+					ilvl?: FilterRange;
+					quality?: FilterRange;
 				};
 			};
 			misc_filters?: {
 				filters: {
-					ilvl?: FilterRange;
-					quality?: FilterRange;
 					gem_level?: FilterRange;
 					corrupted?: FilterBoolean;
 					fractured_item?: FilterBoolean;
@@ -144,50 +137,48 @@ interface TradeRequest {
 					stack_size?: FilterRange;
 				};
 			};
-			armour_filters?: {
+			equipment_filters?: {
 				filters: {
+					// Damage
+					damage?: FilterRange;
+					// Attacks per Second
+					aps?: FilterRange;
+					// Critical Chance;
+					crit?: FilterRange;
+					// Damage per Second
+					dps?: FilterRange;
+					// Physical DPS
+					pdps?: FilterRange;
+					// Elemental DPS
+					edps?: FilterRange;
+					// Armour
 					ar?: FilterRange;
-					es?: FilterRange;
+					// Evasion
 					ev?: FilterRange;
-					ward?: FilterRange;
+					// Energy Shield
+					es?: FilterRange;
+					// Block
 					block?: FilterRange;
-					base_defence_percentile?: FilterRange;
+					// Spirit
+					spirit?: FilterRange;
+					// Empty Rune Sockets
+					rune_sockets?: FilterRange;
 				};
 			};
-			weapon_filters?: {
+			req_filters?: {
 				filters: {
-					dps?: FilterRange;
-					pdps?: FilterRange;
-					edps?: FilterRange;
-					crit?: FilterRange;
-					aps?: FilterRange;
+					lvl?: FilterRange;
+					str?: FilterRange;
+					dex?: FilterRange;
+					int?: FilterRange;
 				};
 			};
 			map_filters?: {
 				filters: {
+					// Waystone Tier
 					map_tier?: FilterRange;
-					map_blighted?: FilterBoolean;
-					map_uberblighted?: FilterBoolean;
-					area_level?: FilterRange;
-				};
-			};
-			heist_filters?: {
-				filters: {
-					heist_wings?: FilterRange;
-					heist_agility?: FilterRange;
-					heist_brute_force?: FilterRange;
-					heist_counter_thaumaturgy?: FilterRange;
-					heist_deception?: FilterRange;
-					heist_demolition?: FilterRange;
-					heist_engineering?: FilterRange;
-					heist_lockpicking?: FilterRange;
-					heist_perception?: FilterRange;
-					heist_trap_disarmament?: FilterRange;
-				};
-			};
-			sentinel_filters?: {
-				filters: {
-					sentinel_durability?: FilterRange;
+					// Waystone Drop Chance
+					map_bonus?: FilterRange;
 				};
 			};
 			trade_filters?: {
@@ -200,7 +191,7 @@ interface TradeRequest {
 		};
 	};
 	sort: {
-		price: "asc";
+		price: "asc" | "desc";
 	};
 }
 
@@ -383,7 +374,7 @@ export function createTradeRequest(
 	if (filters.quality && !filters.quality.disabled) {
 		propSet(
 			query.filters,
-			"misc_filters.filters.quality.min",
+			"type_filters.filters.quality.min",
 			filters.quality.value,
 		);
 	}
@@ -391,13 +382,13 @@ export function createTradeRequest(
 	if (filters.itemLevel && !filters.itemLevel.disabled) {
 		propSet(
 			query.filters,
-			"misc_filters.filters.ilvl.min",
+			"type_filters.filters.ilvl.min",
 			filters.itemLevel.value,
 		);
 		if (filters.itemLevel.max) {
 			propSet(
 				query.filters,
-				"misc_filters.filters.ilvl.max",
+				"type_filters.filters.ilvl.max",
 				filters.itemLevel.max,
 			);
 		}
@@ -488,6 +479,8 @@ export function createTradeRequest(
 		);
 	}
 
+	console.log(stats);
+
 	for (const stat of stats) {
 		if (stat.tradeId[0] === "item.has_empty_modifier") {
 			const TARGET_ID = {
@@ -555,136 +548,125 @@ export function createTradeRequest(
 		if (stat.disabled) continue;
 
 		const input = stat.roll!;
+		console.log(stat.tradeId[0]);
 		switch (stat.tradeId[0] as InternalTradeId) {
-			case "item.base_percentile":
-				propSet(
-					query.filters,
-					"armour_filters.filters.base_defence_percentile.min",
-					typeof input.min === "number" ? input.min : undefined,
-				);
-				propSet(
-					query.filters,
-					"armour_filters.filters.base_defence_percentile.max",
-					typeof input.max === "number" ? input.max : undefined,
-				);
-				break;
 			case "item.armour":
 				propSet(
 					query.filters,
-					"armour_filters.filters.ar.min",
+					"equipment_filters.filters.ar.min",
 					typeof input.min === "number" ? input.min : undefined,
 				);
 				propSet(
 					query.filters,
-					"armour_filters.filters.ar.max",
+					"equipment_filters.filters.ar.max",
 					typeof input.max === "number" ? input.max : undefined,
 				);
 				break;
 			case "item.evasion_rating":
 				propSet(
 					query.filters,
-					"armour_filters.filters.ev.min",
+					"equipment_filters.filters.ev.min",
 					typeof input.min === "number" ? input.min : undefined,
 				);
 				propSet(
 					query.filters,
-					"armour_filters.filters.ev.max",
+					"equipment_filters.filters.ev.max",
 					typeof input.max === "number" ? input.max : undefined,
 				);
 				break;
 			case "item.energy_shield":
 				propSet(
 					query.filters,
-					"armour_filters.filters.es.min",
+					"equipment_filters.filters.es.min",
 					typeof input.min === "number" ? input.min : undefined,
 				);
 				propSet(
 					query.filters,
-					"armour_filters.filters.es.max",
+					"equipment_filters.filters.es.max",
 					typeof input.max === "number" ? input.max : undefined,
 				);
 				break;
 			case "item.ward":
 				propSet(
 					query.filters,
-					"armour_filters.filters.ward.min",
+					"equipment_filters.filters.ward.min",
 					typeof input.min === "number" ? input.min : undefined,
 				);
 				propSet(
 					query.filters,
-					"armour_filters.filters.ward.max",
+					"equipment_filters.filters.ward.max",
 					typeof input.max === "number" ? input.max : undefined,
 				);
 				break;
 			case "item.block":
 				propSet(
 					query.filters,
-					"armour_filters.filters.block.min",
+					"equipment_filters.filters.block.min",
 					typeof input.min === "number" ? input.min : undefined,
 				);
 				propSet(
 					query.filters,
-					"armour_filters.filters.block.max",
+					"equipment_filters.filters.block.max",
 					typeof input.max === "number" ? input.max : undefined,
 				);
 				break;
 			case "item.total_dps":
 				propSet(
 					query.filters,
-					"weapon_filters.filters.dps.min",
+					"equipment_filters.filters.dps.min",
 					typeof input.min === "number" ? input.min : undefined,
 				);
 				propSet(
 					query.filters,
-					"weapon_filters.filters.dps.max",
+					"equipment_filters.filters.dps.max",
 					typeof input.max === "number" ? input.max : undefined,
 				);
 				break;
 			case "item.physical_dps":
 				propSet(
 					query.filters,
-					"weapon_filters.filters.pdps.min",
+					"equipment_filters.filters.pdps.min",
 					typeof input.min === "number" ? input.min : undefined,
 				);
 				propSet(
 					query.filters,
-					"weapon_filters.filters.pdps.max",
+					"equipment_filters.filters.pdps.max",
 					typeof input.max === "number" ? input.max : undefined,
 				);
 				break;
 			case "item.elemental_dps":
 				propSet(
 					query.filters,
-					"weapon_filters.filters.edps.min",
+					"equipment_filters.filters.edps.min",
 					typeof input.min === "number" ? input.min : undefined,
 				);
 				propSet(
 					query.filters,
-					"weapon_filters.filters.edps.max",
+					"equipment_filters.filters.edps.max",
 					typeof input.max === "number" ? input.max : undefined,
 				);
 				break;
 			case "item.crit":
 				propSet(
 					query.filters,
-					"weapon_filters.filters.crit.min",
+					"equipment_filters.filters.crit.min",
 					typeof input.min === "number" ? input.min : undefined,
 				);
 				propSet(
 					query.filters,
-					"weapon_filters.filters.crit.max",
+					"equipment_filters.filters.crit.max",
 					typeof input.max === "number" ? input.max : undefined,
 				);
 				break;
 			case "item.aps":
 				propSet(
 					query.filters,
-					"weapon_filters.filters.aps.min",
+					"equipment_filters.filters.aps.min",
 					typeof input.min === "number" ? input.min : undefined,
 				);
 				propSet(
 					query.filters,
-					"weapon_filters.filters.aps.max",
+					"equipment_filters.filters.aps.max",
 					typeof input.max === "number" ? input.max : undefined,
 				);
 				break;
